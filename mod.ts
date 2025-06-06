@@ -107,26 +107,43 @@ function parse(tokens: { text?: string; tag?: string }[]): Node[] {
   return root;
 }
 
-function render(nodes: Node[]): string {
+/**
+ * Renders an array of nodes into a single string, handling nested ANSI styles.
+ * @param nodes Array of parsed nodes to render.
+ * @param activeCodes Stack of ANSI codes inherited from parent tags.
+ * @returns A string with ANSI escape codes applied, properly reapplying parent styles after nested resets.
+ */
+function render(nodes: Node[], activeCodes: string[] = []): string {
   let out = "";
+
   for (const n of nodes) {
     if (n.type === "text") {
       out += n.content;
     } else {
       const code = MAP_EMOJI_TO_ANSI[n.name];
       if (code) {
-        out += code + render(n.children) + ANSI_RESET;
+        // Build the new active-codes stack for this tag
+        const newActive = [...activeCodes, code];
+
+        // Render children with the new activeCodes
+        const inner = render(n.children, newActive);
+
+        // After closing this tag, we reset all, then reapply the parent's codes
+        const reapplyParent = activeCodes.join("");
+
+        out += code + inner + ANSI_RESET + reapplyParent;
       } else {
         // unknown tag: render literally
-        out += `<${n.name}>` + render(n.children) + `</${n.name}>`;
+        out += `<${n.name}>` + render(n.children, activeCodes) + `</${n.name}>`;
       }
     }
   }
+
   return out;
 }
 
 export function colorize(input: string): string {
   const tokens = tokenize(input);
   const ast = parse(tokens);
-  return render(ast);
+  return render(ast, []);
 }
