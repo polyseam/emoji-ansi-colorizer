@@ -2,30 +2,31 @@ type Node =
   | { type: "text"; content: string }
   | { type: "tag"; name: string; children: Node[] };
 
+const removeVariants = <E extends string>(str: E) => str.replace(/\uFE0F/g, "") as E;
 // standard colors (primary emoji)
-export const EMOJI_BLACK = "⚫";
-export const EMOJI_RED = "🔴";
-export const EMOJI_GREEN = "🟢";
-export const EMOJI_YELLOW = "🟡";
-export const EMOJI_BLUE = "🔵";
-export const EMOJI_MAGENTA = "🟣";
-export const CYAN_EMOJI = "🥶";
-export const WHITE_EMOJI = "⚪";
+export const EMOJI_BLACK = removeVariants("⚫") as "⚫";
+export const EMOJI_RED = removeVariants("🔴") as "🔴";
+export const EMOJI_GREEN = removeVariants("🟢") as "🟢";
+export const EMOJI_YELLOW = removeVariants("🟡") as "🟡";
+export const EMOJI_BLUE = removeVariants("🔵") as "🔵";
+export const EMOJI_MAGENTA = removeVariants("🟣") as "🟣";
+export const CYAN_EMOJI = removeVariants("🥶") as "🥶";
+export const WHITE_EMOJI = removeVariants("⚪") as "⚪";
 
 // bold colors (secondary emoji)
-export const EMOJI_BOLD_BLACK = "⬛️";
-export const EMOJI_BOLD_RED = "🟥";
-export const EMOJI_BOLD_GREEN = "🟩";
-export const EMOJI_BOLD_YELLOW = "🟨";
-export const EMOJI_BOLD_BLUE = "🟦";
-export const EMOJI_BOLD_MAGENTA = "🟪";
-export const EMOJI_BOLD_CYAN = "🧊";
-export const EMOJI_BOLD_WHITE = "⬜";
+export const EMOJI_BOLD_BLACK = removeVariants("⬛️") as "⬛️";
+export const EMOJI_BOLD_RED = removeVariants("🟥") as "🟥";
+export const EMOJI_BOLD_GREEN = removeVariants("🟩") as "🟩";
+export const EMOJI_BOLD_YELLOW = removeVariants("🟨") as "🟨";
+export const EMOJI_BOLD_BLUE = removeVariants("🟦") as "🟦";
+export const EMOJI_BOLD_MAGENTA = removeVariants("🟪") as "🟪";
+export const EMOJI_BOLD_CYAN = removeVariants("🧊") as "🧊";
+export const EMOJI_BOLD_WHITE = removeVariants("⬜") as "⬜";
 
 // dedicated control characters (tertiary emoji)
-export const EMOJI_BOLD = "🧱";
-export const EMOJI_HIGH_INTENSITY = "✨";
-export const EMOJI_UNDERLINE = "🔳";
+export const EMOJI_BOLD = removeVariants("🧱") as "🧱";
+export const EMOJI_HIGH_INTENSITY = removeVariants("✨") as "✨";
+export const EMOJI_UNDERLINE = removeVariants("🔳") as "🔳";
 
 /**
  * Define ANSI code strings, each associated with a list of aliases.
@@ -55,8 +56,20 @@ const ANSI_ALIAS_MAP: Record<string, string[]> = {
 
   // dedicated control characters
   "\x1b[1m": [EMOJI_BOLD, "bold"],
-  "\x1b[90m": [EMOJI_HIGH_INTENSITY, "high-intensity", "hi", "bright", "💎"],
-  "\x1b[4m": [EMOJI_UNDERLINE, "underline", "⚓️", "⎁"],
+  "\x1b[90m": [
+    EMOJI_HIGH_INTENSITY,
+    "high-intensity",
+    "hi",
+    "bright",
+    removeVariants("💎"),
+  ],
+  "\x1b[4m": [
+    EMOJI_UNDERLINE,
+    "underline",
+    EMOJI_UNDERLINE,
+    removeVariants("⚓️"),
+    removeVariants("⎁"),
+  ],
 };
 
 /**
@@ -137,10 +150,10 @@ function render(nodes: Node[], activeCodes: string[] = []): string {
     if (n.type === "text") {
       out += n.content;
     } else {
-      const rawName = n.name; 
-      const name = rawName.replace(/\uFE0F/g, "");
+      const rawName = n.name;
+      const name = removeVariants(rawName);
       const code = MAP_EMOJI_TO_ANSI[name];
-      
+
       if (code) {
         // Build the new active-codes stack for this tag
         const newActive = [...activeCodes, code];
@@ -154,7 +167,8 @@ function render(nodes: Node[], activeCodes: string[] = []): string {
         out += code + inner + ANSI_RESET + reapplyParent;
       } else {
         // unknown tag: render literally
-        out += `<${rawName}>` + render(n.children, activeCodes) + `</${rawName}>`;
+        out += `<${rawName}>` + render(n.children, activeCodes) +
+          `</${rawName}>`;
       }
     }
   }

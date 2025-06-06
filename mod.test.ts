@@ -2,9 +2,6 @@ import { assertEquals } from "@std/assert";
 import { colorize } from "./mod.ts";
 import { MAP_EMOJI_TO_ANSI } from "./mod.ts";
 
-console.log("<⚓️> underlined </⚓️>");
-console.log(colorize("<⚓️> underlined </⚓️>"));
-
 Deno.test("colorize - applies basic color to text", () => {
   const input = "some <🔴>red</🔴> text";
   const coloredRed = colorize(input);
@@ -41,7 +38,7 @@ Deno.test("colorize - more complex structures", () => {
     "some <🔳>underlined text</🔳> followed by some <🧱>bold white and <🔴>bold red</🔴></🧱> text";
   const complex = colorize(input);
 
-  const codeUnderline = MAP_EMOJI_TO_ANSI["⚓️"];
+  const codeUnderline = MAP_EMOJI_TO_ANSI["🔳"];
   const codeBold = MAP_EMOJI_TO_ANSI["🧱"];
   const codeRed = MAP_EMOJI_TO_ANSI["🔴"];
   const RESET = "\x1b[0m";
@@ -130,3 +127,8 @@ Deno.test("unknown tags render literally", () => {
   assertEquals(output, "<unknown>should stay <nested>as-is</nested></unknown>");
   console.log("result:", output);
 });
+console.log(
+  colorize(
+    "<underline>underline</underline> is the same as <⎁>underline</⎁> is the same as <⚓️>underline</⚓️>",
+  ),
+);
