@@ -2,7 +2,8 @@ type Node =
   | { type: "text"; content: string }
   | { type: "tag"; name: string; children: Node[] };
 
-const removeVariants = <E extends string>(str: E) => str.replace(/\uFE0F/g, "") as E;
+const removeVariants = <E extends string>(str: E) =>
+  str.replace(/\uFE0F/g, "") as E;
 // standard colors (primary emoji)
 export const EMOJI_BLACK = removeVariants("⚫") as "⚫";
 export const EMOJI_RED = removeVariants("🔴") as "🔴";
