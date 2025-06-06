@@ -44,7 +44,7 @@ const ANSI_ALIAS_MAP: Record<string, string[]> = {
   "\x1b[37m": [WHITE_EMOJI, "white", "w"],
 
   // bold colors
-  "\x1b[1;90m": [EMOJI_BOLD_BLACK, "bold-black"],
+  "\x1b[1;30m": [EMOJI_BOLD_BLACK, "bold-black"],
   "\x1b[1;31m": [EMOJI_BOLD_RED, "bold-red"],
   "\x1b[1;32m": [EMOJI_BOLD_GREEN, "bold-green"],
   "\x1b[1;33m": [EMOJI_BOLD_YELLOW, "bold-yellow"],

@@ -1,11 +1,11 @@
 import { assertEquals } from "@std/assert";
 import { colorize } from "./mod.ts";
-import { EMOJI_BOLD, EMOJI_RED, MAP_EMOJI_TO_ANSI } from "./mod.ts";
+import { MAP_EMOJI_TO_ANSI } from "./mod.ts";
 
 Deno.test("colorize - applies basic color to text", () => {
   const input = "some <🔴>red</🔴> text";
   const coloredRed = colorize(input);
-  const codeRed = MAP_EMOJI_TO_ANSI[EMOJI_RED];
+  const codeRed = MAP_EMOJI_TO_ANSI["🔴"];
   const RESET = "\x1b[0m";
   const expected = `some ${codeRed}red${RESET} text`;
   assertEquals(coloredRed, expected);
@@ -14,8 +14,8 @@ Deno.test("colorize - applies basic color to text", () => {
 Deno.test("colorize - applies bold and color separately", () => {
   const input = "some <🧱>bold white and <🔴>bold red</🔴></🧱> text";
   const boldRedBrick = colorize(input);
-  const codeBold = MAP_EMOJI_TO_ANSI[EMOJI_BOLD];
-  const codeRed = MAP_EMOJI_TO_ANSI[EMOJI_RED];
+  const codeBold = MAP_EMOJI_TO_ANSI["🧱"];
+  const codeRed = MAP_EMOJI_TO_ANSI["🔴"];
   const RESET = "\x1b[0m";
   const expected =
     `some ${codeBold}bold white and ${codeRed}bold red${RESET}${codeBold}${RESET} text`;
@@ -38,9 +38,9 @@ Deno.test("colorize - more complex structures", () => {
     "some <🔳>underlined text</🔳> followed by some <🧱>bold white and <🔴>bold red</🔴></🧱> text";
   const complex = colorize(input);
 
-  const codeUnderline = MAP_EMOJI_TO_ANSI["🔳"];
-  const codeBold = MAP_EMOJI_TO_ANSI[EMOJI_BOLD];
-  const codeRed = MAP_EMOJI_TO_ANSI[EMOJI_RED];
+  const codeUnderline = MAP_EMOJI_TO_ANSI["⚓️"];
+  const codeBold = MAP_EMOJI_TO_ANSI["🧱"];
+  const codeRed = MAP_EMOJI_TO_ANSI["🔴"];
   const RESET = "\x1b[0m";
 
   const expected =
@@ -59,17 +59,17 @@ Deno.test("plain text remains unchanged", () => {
 });
 
 Deno.test("single color tag wraps text in correct ANSI codes", () => {
-  const input = `<${EMOJI_RED}>hello</${EMOJI_RED}>`;
-  const expected = `${MAP_EMOJI_TO_ANSI[EMOJI_RED]}hello${RESET}`;
+  const input = `<🔴>hello</🔴>`;
+  const expected = `${MAP_EMOJI_TO_ANSI["🔴"]}hello${RESET}`;
   assertEquals(colorize(input), expected);
   console.log("result:", expected);
 });
 
 Deno.test("nested color tags reapply parent after inner reset", () => {
-  const codeRed = MAP_EMOJI_TO_ANSI[EMOJI_RED];
+  const codeRed = MAP_EMOJI_TO_ANSI["🔴"];
   const codeBlue = MAP_EMOJI_TO_ANSI["🔵"];
 
-  const input = `<${EMOJI_RED}>red <🔵>blue</🔵> still red</${EMOJI_RED}>`;
+  const input = `<🔴>red <🔵>blue</🔵> still red</🔴>`;
 
   // Breakdown:
   // 1. Apply red: codeRed
@@ -93,9 +93,8 @@ Deno.test("nested color tags reapply parent after inner reset", () => {
 });
 
 Deno.test("bold control character works", () => {
-  const codeBold = MAP_EMOJI_TO_ANSI[EMOJI_BOLD];
-
-  const input = `<${EMOJI_BOLD}>very bold</${EMOJI_BOLD}>`;
+  const codeBold = MAP_EMOJI_TO_ANSI["🧱"];
+  const input = `<🧱>very bold</🧱>`;
   const expected = `${codeBold}very bold${RESET}`;
   assertEquals(colorize(input), expected);
   console.log("result:", expected);
@@ -104,7 +103,7 @@ Deno.test("bold control character works", () => {
 Deno.test("'cyan' and '🥶' are equivalent", () => {
   const input = "<cyan>cyan</cyan> is the same as <🥶>cyan</🥶>";
   const expected = `${MAP_EMOJI_TO_ANSI["🥶"]}cyan${RESET} is the same as ${
-    MAP_EMOJI_TO_ANSI["cyan"]
+    MAP_EMOJI_TO_ANSI["🥶"]
   }cyan${RESET}`;
   assertEquals(colorize(input), expected);
   console.log("result:", expected);
