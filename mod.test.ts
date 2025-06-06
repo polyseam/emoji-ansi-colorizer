@@ -2,6 +2,9 @@ import { assertEquals } from "@std/assert";
 import { colorize } from "./mod.ts";
 import { MAP_EMOJI_TO_ANSI } from "./mod.ts";
 
+console.log("<⚓️> underlined </⚓️>");
+console.log(colorize("<⚓️> underlined </⚓️>"));
+
 Deno.test("colorize - applies basic color to text", () => {
   const input = "some <🔴>red</🔴> text";
   const coloredRed = colorize(input);
@@ -109,11 +112,11 @@ Deno.test("'cyan' and '🥶' are equivalent", () => {
   console.log("result:", expected);
 });
 
-Deno.test("'⚓️' and 'underline' are equivalent", () => {
+Deno.test("'🔳' and 'underline' are equivalent", () => {
   const input =
-    "<⚓️>underlined</⚓️> is the same as <underline>underlined</underline>";
+    "<🔳>underlined</🔳> is the same as <underline>underlined</underline>";
   const expected = `${
-    MAP_EMOJI_TO_ANSI["⚓️"]
+    MAP_EMOJI_TO_ANSI["🔳"]
   }underlined${RESET} is the same as ${
     MAP_EMOJI_TO_ANSI["underline"]
   }underlined${RESET}`;

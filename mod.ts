@@ -137,7 +137,10 @@ function render(nodes: Node[], activeCodes: string[] = []): string {
     if (n.type === "text") {
       out += n.content;
     } else {
-      const code = MAP_EMOJI_TO_ANSI[n.name];
+      const rawName = n.name; 
+      const name = rawName.replace(/\uFE0F/g, "");
+      const code = MAP_EMOJI_TO_ANSI[name];
+      
       if (code) {
         // Build the new active-codes stack for this tag
         const newActive = [...activeCodes, code];
@@ -151,7 +154,7 @@ function render(nodes: Node[], activeCodes: string[] = []): string {
         out += code + inner + ANSI_RESET + reapplyParent;
       } else {
         // unknown tag: render literally
-        out += `<${n.name}>` + render(n.children, activeCodes) + `</${n.name}>`;
+        out += `<${rawName}>` + render(n.children, activeCodes) + `</${rawName}>`;
       }
     }
   }
