@@ -110,6 +110,18 @@ Deno.test("'cyan' and '🥶' are equivalent", () => {
   console.log("result:", expected);
 });
 
+Deno.test("'⚓️' and 'underline' are equivalent", () => {
+  const input =
+    "<⚓️>underlined</⚓️> is the same as <underline>underlined</underline>";
+  const expected = `${
+    MAP_EMOJI_TO_ANSI["⚓️"]
+  }underlined${RESET} is the same as ${
+    MAP_EMOJI_TO_ANSI["underline"]
+  }underlined${RESET}`;
+  assertEquals(colorize(input), expected);
+  console.log("result:", expected);
+});
+
 Deno.test("unknown tags render literally", () => {
   const input = "<unknown>should stay <nested>as-is</nested></unknown>";
   const output = colorize(input);

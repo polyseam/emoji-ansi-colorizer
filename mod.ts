@@ -2,7 +2,7 @@ type Node =
   | { type: "text"; content: string }
   | { type: "tag"; name: string; children: Node[] };
 
-// standard colors
+// standard colors (primary emoji)
 export const EMOJI_BLACK = "⚫";
 export const EMOJI_RED = "🔴";
 export const EMOJI_GREEN = "🟢";
@@ -12,7 +12,7 @@ export const EMOJI_MAGENTA = "🟣";
 export const CYAN_EMOJI = "🥶";
 export const WHITE_EMOJI = "⚪";
 
-// bold colors
+// bold colors (secondary emoji)
 export const EMOJI_BOLD_BLACK = "⬛️";
 export const EMOJI_BOLD_RED = "🟥";
 export const EMOJI_BOLD_GREEN = "🟩";
@@ -22,37 +22,54 @@ export const EMOJI_BOLD_MAGENTA = "🟪";
 export const EMOJI_BOLD_CYAN = "🧊";
 export const EMOJI_BOLD_WHITE = "⬜";
 
-// dedicated control characters
+// dedicated control characters (tertiary emoji)
 export const EMOJI_BOLD = "🧱";
-export const EMOJI_HIGH_INTENSITY = "💎";
+export const EMOJI_HIGH_INTENSITY = "✨";
 export const EMOJI_UNDERLINE = "🔳";
 
-export const MAP_EMOJI_TO_ANSI: Record<string, string> = {
-  // standard
-  [EMOJI_BLACK]: "\x1b[30m",
-  [EMOJI_RED]: "\x1b[31m",
-  [EMOJI_GREEN]: "\x1b[32m",
-  [EMOJI_YELLOW]: "\x1b[33m",
-  [EMOJI_BLUE]: "\x1b[34m",
-  [EMOJI_MAGENTA]: "\x1b[35m",
-  [CYAN_EMOJI]: "\x1b[36m",
-  [WHITE_EMOJI]: "\x1b[37m",
+/**
+ * Define ANSI code strings, each associated with a list of aliases.
+ * You can freely add more string aliases (like "red", "r", "error", etc.)
+ * to the array for each ANSI code.
+ */
+const ANSI_ALIAS_MAP: Record<string, string[]> = {
+  // standard (non-bold) colors
+  "\x1b[30m": [EMOJI_BLACK, "black"],
+  "\x1b[31m": [EMOJI_RED, "red", "r"],
+  "\x1b[32m": [EMOJI_GREEN, "green", "g"],
+  "\x1b[33m": [EMOJI_YELLOW, "yellow", "y"],
+  "\x1b[34m": [EMOJI_BLUE, "blue", "b"],
+  "\x1b[35m": [EMOJI_MAGENTA, "magenta", "m"],
+  "\x1b[36m": [CYAN_EMOJI, "cyan", "c"],
+  "\x1b[37m": [WHITE_EMOJI, "white", "w"],
 
-  // bold
-  [EMOJI_BOLD_BLACK]: "\x1b[1;90m",
-  [EMOJI_BOLD_RED]: "\x1b[1;31m",
-  [EMOJI_BOLD_GREEN]: "\x1b[1;32m",
-  [EMOJI_BOLD_YELLOW]: "\x1b[1;33m",
-  [EMOJI_BOLD_BLUE]: "\x1b[1;34m",
-  [EMOJI_BOLD_MAGENTA]: "\x1b[1;35m",
-  [EMOJI_BOLD_CYAN]: "\x1b[1;36m",
-  [EMOJI_BOLD_WHITE]: "\x1b[1;37m",
+  // bold colors
+  "\x1b[1;90m": [EMOJI_BOLD_BLACK, "bold-black"],
+  "\x1b[1;31m": [EMOJI_BOLD_RED, "bold-red"],
+  "\x1b[1;32m": [EMOJI_BOLD_GREEN, "bold-green"],
+  "\x1b[1;33m": [EMOJI_BOLD_YELLOW, "bold-yellow"],
+  "\x1b[1;34m": [EMOJI_BOLD_BLUE, "bold-blue"],
+  "\x1b[1;35m": [EMOJI_BOLD_MAGENTA, "bold-magenta"],
+  "\x1b[1;36m": [EMOJI_BOLD_CYAN, "bold-cyan"],
+  "\x1b[1;37m": [EMOJI_BOLD_WHITE, "bold-white"],
 
   // dedicated control characters
-  [EMOJI_BOLD]: "\x1b[1m",
-  [EMOJI_HIGH_INTENSITY]: "\x1b[90m",
-  [EMOJI_UNDERLINE]: "\x1b[4m",
+  "\x1b[1m": [EMOJI_BOLD, "bold"],
+  "\x1b[90m": [EMOJI_HIGH_INTENSITY, "high-intensity", "hi", "bright", "💎"],
+  "\x1b[4m": [EMOJI_UNDERLINE, "underline", "⚓️", "⎁"],
 };
+
+/**
+ * Flatten ANSI_ALIAS_MAP into a lookup table from any alias string
+ * (emoji or textual) to the corresponding ANSI code.
+ */
+export const MAP_EMOJI_TO_ANSI: Record<string, string> = {};
+
+for (const [ansiCode, aliases] of Object.entries(ANSI_ALIAS_MAP)) {
+  for (const alias of aliases) {
+    MAP_EMOJI_TO_ANSI[alias] = ansiCode;
+  }
+}
 
 const ANSI_RESET = "\x1b[0m";
 
@@ -142,6 +159,30 @@ function render(nodes: Node[], activeCodes: string[] = []): string {
   return out;
 }
 
+/**
+ * Converts emoji-wrapped text into ANSI-colored terminal output.
+ *
+ * This function processes a string containing emoji tags and replaces them with
+ * the corresponding ANSI escape codes for terminal text styling. It supports
+ * nested styles, where inner tags can override or combine with outer styles.
+ *
+ * @example
+ * // Basic usage with a single color
+ * colorize("Hello <🔴>world</🔴>!");
+ * // Returns: "Hello \x1b[31mworld\x1b[0m!" (red text in terminal)
+ *
+ * @example
+ * // Nested styles
+ * colorize("<🧱>Bold and <🔴>red</🔴></🧱> text");
+ * // Returns: "\x1b[1mBold and \x1b[31mred\x1b[0m\x1b[1m\x1b[0m text"
+ *
+ * @param {string} input - The input string containing emoji tags to be converted.
+ *                         Tags should be in the format `<emoji>text</emoji>`.
+ *                         Unknown tags are rendered literally.
+ * @returns {string} The input string with emoji tags replaced by ANSI escape codes.
+ *                  The output is ready to be printed to a terminal that supports
+ *                  ANSI color codes.
+ */
 export function colorize(input: string): string {
   const tokens = tokenize(input);
   const ast = parse(tokens);
