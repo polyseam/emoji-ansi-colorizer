@@ -1,0 +1,15 @@
+{
+  "name": "@polyseam/emoji-ansi-colorizer",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "description": "colorful text powered by emojis",
+  "exports": {
+    ".": "./mod.ts"
+  },
+  "tasks": {
+    "test": "deno test"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1"
+  }
+}
